@@ -1,5 +1,3 @@
-Welcome to the meal planner app. The purpose of this app is to allow a user to find recipe inspirations using a single ingredient. When the program is run, the user inputs the amount of recipes they'd like to see, along with the primary ingredient they'll be using. For now the program fetches the data using the Spoonacular API and stores it in a PostgreSQL database. Certain error handling conditions are implemented to ensure proper usage. These include limiting the number of recipes per fetch, ensuring no duplicate entries into the db, and ensuring valid ingredient queries. The next stop will be to make this more interactive and displayable through a web page.
-
 Meal Planner App Setup and Run Instructions
 Step 1: PostgreSQL Database Setup
 Install PostgreSQL if it's not already installed. Download from PostgreSQL official website.
