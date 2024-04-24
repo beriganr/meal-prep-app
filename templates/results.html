@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Recipe Results</title>
+</head>
+<body>
+    <h1>Recipes Found</h1>
+    {% if recipes %}
+        {% for recipe in recipes %}
+            <div><h2>{{ recipe.title }}</h2><img src="{{ recipe.image }}" alt="Image of {{ recipe.title }}" style='width:100px;height:100px;'></div>
+        {% endfor %}
+    {% else %}
+        <p>{{ error }}</p>
+    {% endif %}
+    <br><a href="/">Search again</a>
+</body>
+</html>

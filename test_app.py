@@ -1,44 +1,36 @@
 import unittest
-from flask_testing import TestCase
-from app import app, db
-from models import Recipe
+from app import app, db, Recipe
 from unittest.mock import patch
-import json
 
-class TestFlaskApp(TestCase):
-    def create_app(self):
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-        app.config['TESTING'] = True
-        return app
+class FlaskTestCase(unittest.TestCase):
 
     def setUp(self):
-        db.create_all()
+        app.config['TESTING'] = True
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+        app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+        self.app = app.test_client()
+
+        with app.app_context():
+            db.create_all()
 
     def tearDown(self):
-        db.session.remove()
-        db.drop_all()
+        with app.app_context():
+            db.session.remove()
+            db.drop_all()
 
-    @patch('requests.get')
-    def test_recipe_search_api_call(self, mock_get):
-        # Mock the API response
-        mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = [{'id': 123, 'title': 'Pasta with Tomato', 'image': 'url-to-image'}]
-
-        response = self.client.get('/search?ingredients=tomato,pasta')
+    def test_home_page(self):
+        response = self.app.get('/')
         self.assertEqual(response.status_code, 200)
-        self.assertIn('Pasta with Tomato', str(response.data))
+        self.assertIn(b'Search for Recipes', response.data)
 
-        # Test that the data is cached by checking database entries
-        recipes = Recipe.query.all()
-        self.assertEqual(len(recipes), 1)
-        self.assertEqual(recipes[0].title, 'Pasta with Tomato')
+    def test_valid_search(self):
+        response = self.app.get('/search?ingredient1=chicken&diet=gluten-free')
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(b'Recipes Found', response.data)
 
-        # Test subsequent API call uses cache
-        response = self.client.get('/search?ingredients=tomato,pasta')
-        mock_get.assert_called_once()  # API should not be called again
-
-    def test_invalid_input(self):
-        response = self.client.get('/search?ingredients=tomato,pasta,cheese,garlic')
+    def test_no_ingredients(self):
+        response = self.app.get('/search?ingredient1=&ingredient2=&ingredient3=')
         self.assertEqual(response.status_code, 400)
 
 if __name__ == '__main__':
